@@ -137,6 +137,13 @@ export function ModulDetail({ modul, onClose }: { modul: Modul; onClose: () => v
             ) : (
               <p className="small muted">Alle {liste.length} Termine addiert.</p>
             )}
+            {aktuell?.notenbonus ? <p className="small faint">Verteilung inkl. Notenbonus {formatBonus(aktuell.notenbonus)}</p> : null}
+            {aktuell?.hinweis ? <p className="small faint">{aktuell.hinweis}</p> : null}
+            {!aktuell && liste.some((ns) => ns.notenbonus) ? (
+              <p className="small faint">
+                Enthält Termine mit Notenbonus ({liste.filter((ns) => ns.notenbonus).map((ns) => ns.semester).join(", ")}).
+              </p>
+            ) : null}
             <div className="grid-3" style={{ gap: 10 }}>
               <Stat label="Ø bestanden" wert={formatSchnitt(k.schnittBestanden)} />
               <Stat label="Durchfallquote" wert={formatProzent(k.durchfallquote)} />
@@ -256,6 +263,8 @@ export function ModulDetail({ modul, onClose }: { modul: Modul; onClose: () => v
     </div>
   );
 }
+
+const formatBonus = (x: number) => x.toLocaleString("de-DE", { maximumFractionDigits: 2 });
 
 function Stat({ label, wert }: { label: string; wert: string }) {
   return (

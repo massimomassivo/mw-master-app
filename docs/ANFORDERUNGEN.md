@@ -155,10 +155,10 @@ Bewusst einfach: **Die App rechnet nichts zurück.** Man trägt vermutete Noten 
   - Kurzbeschreibung, Prüfungsform, Leitung, Sprache, CP, erlaubte Kategorien, Tags
   - Links: Modulbeschreibung in TUMonline und die Lehrveranstaltung pro Semester. Sie öffnen sich im Standardbrowser.
   - **Notenspiegel:** Ein Modul kann beliebig viele Notenspiegel haben, einen pro Prüfungstermin. Jeder ist datiert (Semester, Haupt- oder Wiederholungstermin, wenn bekannt auch das Prüfungsdatum).
-    - Auswahl eines Termins: Balkendiagramm über die Notenstufen 1,0 bis 5,0 plus „nicht erschienen“, mit den Kennzahlen Angemeldet, Angetreten, Ø gesamt, Ø bestanden und Durchfallquote.
+    - Auswahl eines Termins: Balkendiagramm über die Notenstufen 1,0 bis 5,0 plus „nicht erschienen“, mit den Kennzahlen Angemeldet, Angetreten, Ø gesamt, Ø bestanden und Durchfallquote. Die Bonus-Stufen 1,4 / 2,4 / 3,4 erscheinen nur, wenn die gezeigte Verteilung dort einen Wert > 0 hat, einsortiert zwischen die Nachbarstufen; ohne Bonus-Daten sieht das Diagramm aus wie immer. Hat der Termin `notenbonus`, steht dezent „Verteilung inkl. Notenbonus 0,3“ darunter, ein `hinweis` erscheint als kleine Notiz.
     - Vergleich: alle Termine als Tabelle untereinander, chronologisch sortiert. So sieht man Haupt- gegen Wiederholungstermin und die Entwicklung über die Jahre.
     - Verlauf: kleines Liniendiagramm für Ø bestanden und Durchfallquote über die Termine, ab zwei Terminen.
-    - „Alle Termine zusammen“: Verteilungen addiert.
+    - „Alle Termine zusammen“: Verteilungen addiert (Vereinigung der Stufen). Ist ein Termin mit Notenbonus dabei, steht ein kurzer Hinweis darauf da.
     - In Katalogtabelle und Semesterplan stehen Ø bestanden und Durchfallquote **eines Referenztermins**, mit Hinweis auf die Anzahl der Termine. Dafür gelten drei Regeln:
       1. **Auswahl:** Referenztermin ist der neueste Haupttermin. Hat ein Modul keinen Haupttermin (nur Wiederholungen oder nur Termine mit Art „unbekannt“, z. B. bei Turnus `unregelmaessig`), ist es der neueste Termin, egal welcher Art. Die Auswahl steckt in einer einzigen Funktion (`referenztermin` in `src/logic/notenspiegel.ts`), die Katalogtabelle und Semesterplan gemeinsam nutzen.
       2. **Semester:** Neben den Werten steht immer das Semester des Referenztermins, dezent und in kleinerer Schrift, z. B. „2,4 · WS 24/25“. Ist der Referenztermin kein Haupttermin (Fallback aus Regel 1), steht zusätzlich „Wdh.“ dabei.
@@ -222,7 +222,7 @@ Dateien sind UTF-8, die Daten-Schlüssel deutsch und in camelCase. Jede Moduldat
 
 ```json
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "updatedAt": "2026-10-07T18:00:00+02:00",
   "studiengang": "M.Sc. Maschinenwesen (TUM)",
   "studienplan": "20261",
@@ -232,7 +232,12 @@ Dateien sind UTF-8, die Daten-Schlüssel deutsch und in camelCase. Jede Moduldat
 }
 ```
 
-`schemaVersion` hat das Format `MAJOR.MINOR`. Eine neue MINOR-Version fügt nur optionale Felder hinzu, eine neue MAJOR-Version bricht die Kompatibilität.
+`schemaVersion` hat das Format `MAJOR.MINOR`. Eine neue MINOR-Version fügt nur optionale Felder hinzu, eine neue MAJOR-Version bricht die Kompatibilität. Die App prüft nur die Hauptversion; eine neuere MINOR-Version wird ohne Warnung gelesen.
+
+| Version | Änderung |
+|---|---|
+| 1.0 | erste Fassung |
+| 1.1 | Notenspiegel: Stufen `1.4`, `2.4`, `3.4` in `verteilung`, neue optionale Felder `notenbonus` und `hinweis` (5.5). App-Versionen bis einschließlich v0.1.0 kennen die Bonus-Stufen nicht und behalten für solche Moduldateien ihren Cache. |
 
 ### 5.3 `regeln.json`
 
@@ -351,6 +356,16 @@ Pflichtfelder sind `code`, `titel`, `cp`, `kategorien` und `turnus`. Alle andere
 | `art` | `Haupttermin`, `Wiederholung` oder `unbekannt`. Optional: Fehlt das Feld, leitet die App es nach der Regel unten ab. |
 | `pruefungsdatum` | ISO-Datum, falls bekannt, sonst `null` |
 
+**Notenspiegel – Verteilung und Notenbonus** (seit 1.1)
+
+| Feld | Bedeutung |
+|---|---|
+| `verteilung` | Anzahl je Notenstufe, ohne „nicht erschienen“. Erlaubte Schlüssel: `"1.0"`, `"1.3"`, `"1.7"`, `"2.0"`, `"2.3"`, `"2.7"`, `"3.0"`, `"3.3"`, `"3.7"`, `"4.0"`, `"4.3"`, `"4.7"`, `"5.0"` und zusätzlich `"1.4"`, `"2.4"`, `"3.4"`. Die drei Bonus-Stufen kommen nur vor, wenn ein Notenbonus von 0,3 eine 1,7 / 2,7 / 3,7 verbessert hat; TUMonline zeigt sie dann in der Verteilung. Werte sind ganze Zahlen ≥ 0. Stufen mit 0 dürfen fehlen. |
+| `notenbonus` | Optional, Zahl > 0, z. B. `0.3`: Die Verteilung enthält bereits einen Notenbonus dieser Größe. Die App rechnet nichts heraus, sie zeigt nur einen Hinweis. |
+| `hinweis` | Optional, kurzer Text zu diesem Termin (z. B. wofür es den Bonus gab). Die App zeigt ihn in der Detailansicht als kleine Notiz. |
+
+Die eigenen Noten (4.1) bleiben auf den Standardstufen aus `regeln.json`.
+
 **Regel für Haupt- und Wiederholungstermin:** Eine Klausur wird pro Semester nur einmal angeboten. Welche Art ein Termin ist, ergibt sich deshalb aus dem `turnus` des Moduls (er steht in TUMonline bei der Lehrveranstaltung, nicht bei der Prüfung):
 
 | `turnus` | Prüfung im WS | Prüfung im SS |
@@ -369,7 +384,7 @@ Claude setzt `art` beim Eintragen nach dieser Regel. Ist ein Termin bekannterma�
 | Angetreten | Σ verteilung (ohne „nicht erschienen“) |
 | Angemeldet | Angetreten + nichtErschienen |
 | Ø gesamt | Σ(Stufe × Anzahl) / Angetreten |
-| Ø bestanden | dasselbe, nur über Stufen ≤ 4,0 |
+| Ø bestanden | dasselbe, nur über Stufen ≤ 4,0 (Bonus-Stufen 1,4 / 2,4 / 3,4 zählen wie alle anderen) |
 | Durchfallquote | Anzahl der Stufen > 4,0 / Angetreten |
 
 Die App rechnet alle Kennzahlen selbst aus `verteilung` und `nichtErschienen` aus. Die Werte unter `tumonline` sind die abgelesenen Originalzahlen. Sie dienen Claude als **Kontrolle beim Auslesen**: Weichen die selbst berechneten Werte um mehr als 0,01 ab, hat Claude sich verlesen. Für die zusammengefasste Ansicht über alle Termine werden die Verteilungen addiert.

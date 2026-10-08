@@ -7,6 +7,18 @@ import { compareSemester, terminArt } from "./semester";
 /** Grade steps in display order. Steps above 4,0 are fails. */
 export const STUFEN = ["1.0", "1.3", "1.7", "2.0", "2.3", "2.7", "3.0", "3.3", "3.7", "4.0", "4.3", "4.7", "5.0"] as const;
 
+/** Extra steps that only occur when a grade bonus of 0,3 shifted 1,7 / 2,7 / 3,7 (schema 1.1). */
+export const BONUS_STUFEN = ["1.4", "2.4", "3.4"] as const;
+
+/**
+ * Steps to draw for a distribution, in grade order: the regular ones always,
+ * a bonus step only if it has a count > 0.
+ */
+export function sichtbareStufen(verteilung: Record<string, number>): string[] {
+  const bonus = BONUS_STUFEN.filter((s) => (verteilung[s] ?? 0) > 0);
+  return [...STUFEN, ...bonus].sort((a, b) => stufe100(a) - stufe100(b));
+}
+
 const stufe100 = (s: string) => Math.round(Number(s) * 100);
 
 export interface Kennzahlen {

@@ -114,3 +114,32 @@ test("manifest change detection", () => {
   assert.equal(manifestGeaendert(mf.replace("2026-10-07T18:00:00", "2026-10-08T09:00:00"), first), true);
   assert.equal(manifestGeaendert(mf, null), true);
 });
+
+test("schema 1.1: grade bonus steps and notenbonus", () => {
+  const modul = (eintrag: Record<string, unknown>) =>
+    pruefe(
+      "modul",
+      JSON.stringify({
+        code: "XX9001",
+        titel: "x",
+        cp: 5,
+        kategorien: ["K"],
+        turnus: "WS",
+        notenspiegel: [{ termin: "FA 25W", semester: "WS 25/26", nichtErschienen: 0, verteilung: { "1.0": 1 }, ...eintrag }],
+      }),
+    );
+  assert.equal(modul({ verteilung: { "1.4": 3, "2.4": 2, "3.4": 1, "5.0": 1 } }).ok, true);
+  assert.equal(modul({ verteilung: { "1.5": 1 } }).ok, false);
+  assert.equal(modul({}).ok, true, "notenbonus is optional");
+  assert.equal(modul({ notenbonus: 0.3 }).ok, true);
+  assert.equal(modul({ notenbonus: "0,3" }).ok, false);
+  assert.equal(modul({ hinweis: "Bonus für Übungen" }).ok, true);
+});
+
+test("a newer minor schema version is accepted without a warning", () => {
+  const mf = JSON.parse(readFileSync(join(EX, "manifest.json"), "utf-8"));
+  mf.schemaVersion = "1.7";
+  const r = verarbeite(replace(readExamples(), "manifest.json", JSON.stringify(mf)), null, JETZT);
+  assert.equal(r.fehler, null);
+  assert.deepEqual(r.warnungen, []);
+});

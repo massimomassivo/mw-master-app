@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Modul, Notenspiegel } from "../types";
-import { artVon, chronologisch, kennzahlen, MIN_ANGETRETENE, pruefeGegenTumonline, referenztermin, summiere } from "./notenspiegel";
+import { artVon, chronologisch, kennzahlen, MIN_ANGETRETENE, pruefeGegenTumonline, referenztermin, sichtbareStufen, STUFEN, summiere } from "./notenspiegel";
 
 // Invented numbers. The formulas were checked against real TUMonline exports
 // (the published averages and fail rates came out exactly); real exam
@@ -125,4 +125,32 @@ test("reference exam: small sample warning below 15 Angetretene", () => {
 test("reference exam: none without a Notenspiegel", () => {
   assert.equal(referenztermin(modulMit("WS")), null);
   assert.equal(referenztermin(modulMit("WS", [])), null);
+});
+
+test("grade bonus steps 1,4 / 2,4 / 3,4 count like any other step", () => {
+  const k = kennzahlen(ns("FA 25W", "WS 25/26", { "1.0": 5, "1.4": 10, "2.4": 10, "3.4": 5, "3.7": 5, "4.7": 5, "5.0": 5 }, 0, { notenbonus: 0.3 }));
+  assert.equal(k.angetreten, 45);
+  assert.equal(k.bestanden, 35);
+  // 12 700 / 45 hundredths
+  assert.ok(Math.abs(k.schnittGesamt! - 2.8222222) < 1e-6);
+  assert.equal(k.schnittGesamt!.toFixed(2), "2.82");
+  // 7 850 / 35 hundredths
+  assert.ok(Math.abs(k.schnittBestanden! - 2.2428571) < 1e-6);
+  assert.equal(k.schnittBestanden!.toFixed(2), "2.24");
+  assert.ok(Math.abs(k.durchfallquote! - 10 / 45) < 1e-12);
+  assert.equal((k.durchfallquote! * 100).toFixed(2), "22.22");
+});
+
+test("bonus steps are only shown when they have a count", () => {
+  assert.deepEqual(sichtbareStufen({ "1.0": 1, "5.0": 1 }), [...STUFEN]);
+  assert.deepEqual(sichtbareStufen({ "1.0": 1, "1.4": 0, "2.4": 0 }), [...STUFEN]);
+  const mit = sichtbareStufen({ "1.4": 2, "3.4": 1 });
+  assert.equal(mit.length, STUFEN.length + 2);
+  assert.deepEqual(mit.slice(1, 4), ["1.3", "1.4", "1.7"]);
+  assert.deepEqual(mit.slice(8, 11), ["3.3", "3.4", "3.7"]);
+  assert.ok(!mit.includes("2.4"));
+  // pooled: union of the steps
+  const s = summiere([ns("A", "WS 24/25", { "1.0": 1 }, 0), ns("B", "WS 25/26", { "2.4": 3 }, 0, { notenbonus: 0.3 })]);
+  assert.deepEqual(s.verteilung, { "1.0": 1, "2.4": 3 });
+  assert.ok(sichtbareStufen(s.verteilung).includes("2.4"));
 });

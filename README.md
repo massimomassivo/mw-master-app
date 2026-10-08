@@ -43,6 +43,10 @@ Gewählt werden darf der Ordner `shared` selbst oder der Ordner, der ihn enthäl
 
 Unter Einstellungen → Meine Daten kannst du einen **Backup-Ordner** wählen (z. B. einen privaten OneDrive-Ordner, nicht den geteilten). Die App schreibt dann nach jeder Änderung `mw-master-backup.json`. Über „Wiederherstellen / Importieren“ holst du ein Backup zurück, z. B. auf einem neuen Rechner.
 
+## Änderungen
+
+- **Datenformat 1.1:** Notenspiegel mit Notenbonus (Stufen 1,4 / 2,4 / 3,4, Felder `notenbonus` und `hinweis`). Ältere App-Versionen halten solche Moduldateien für ungültig und zeigen für diese Module weiter den alten Stand – dann bitte die App aktualisieren.
+
 ## Entwicklung
 
 Tauri 2 (Rust) + React/TypeScript. Details für Entwickler und Claude Code: [CLAUDE.md](CLAUDE.md), Spezifikation: [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md).

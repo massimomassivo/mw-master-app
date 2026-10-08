@@ -65,9 +65,16 @@ export interface Notenspiegel {
   art?: TerminArt;
   pruefungsdatum?: string | null;
   angemeldet?: number;
-  /** Count per grade step, keys "1.0" … "5.0" (without "nicht erschienen"). */
+  /**
+   * Count per grade step, keys "1.0" … "5.0" (without "nicht erschienen").
+   * "1.4", "2.4", "3.4" only occur with a grade bonus (schema 1.1).
+   */
   verteilung: Record<string, number>;
   nichtErschienen: number;
+  /** The distribution already includes a grade bonus of this size, e.g. 0.3 (schema 1.1). */
+  notenbonus?: number;
+  /** Short note on this exam, shown in the detail view (schema 1.1). */
+  hinweis?: string;
   /** Numbers as read off the TUMonline screenshot; only used to check the extraction. */
   tumonline?: { angetreten?: number; quoteNegativ?: number; schnittGesamt?: number; schnittBestanden?: number };
   erfasstAm?: string;

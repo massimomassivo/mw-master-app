@@ -3,7 +3,7 @@
 // square base, hairline grid, 2px lines, ≥ 8px markers with a surface ring,
 // hover tooltips, legend for more than one series, text never in data colours.
 import { useState } from "react";
-import { STUFEN } from "../logic/notenspiegel";
+import { sichtbareStufen } from "../logic/notenspiegel";
 
 const W = 560;
 const H = 210;
@@ -27,9 +27,10 @@ function colPath(x: number, y: number, w: number, h: number, r = 4): string {
 
 export function VerteilungChart({ verteilung, nichtErschienen, titel }: { verteilung: Record<string, number>; nichtErschienen: number; titel: string }) {
   const [hover, setHover] = useState<number | null>(null);
-  const angetreten = STUFEN.reduce((a, s) => a + (verteilung[s] ?? 0), 0);
+  const stufen = sichtbareStufen(verteilung);
+  const angetreten = stufen.reduce((a, s) => a + (verteilung[s] ?? 0), 0);
   const slots = [
-    ...STUFEN.map((s) => ({ label: s.replace(".", ","), n: verteilung[s] ?? 0, art: Number(s) <= 4 ? "pass" : "fail" })),
+    ...stufen.map((s) => ({ label: s.replace(".", ","), n: verteilung[s] ?? 0, art: Number(s) <= 4 ? "pass" : "fail" })),
     { label: "n. e.", n: nichtErschienen, art: "absent" },
   ];
   const { max, step } = niceMax(Math.max(...slots.map((s) => s.n)));
