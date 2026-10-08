@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import type { Belegung, SpielZeile } from "../types";
 import { erreichteLeistungen, strukturCheck } from "./noten";
 import { FALLBACK_REGELN as R } from "./shared";
-import { alsLeistungen, ausPlan, offeneCpAuffuellen, spielErgebnis } from "./spiel";
+import { alsLeistungen, ausPlan, modulCodeVon, offeneCpAuffuellen, spielErgebnis } from "./spiel";
 
 let nextId = 1;
 const B = (kategorie: string, cp: number, status: Belegung["status"], note: number | null = null): Belegung => ({
@@ -29,6 +29,16 @@ test("rows from the plan, without duplicates", () => {
   const rows = ausPlan(bs, []);
   assert.deepEqual(rows.map((r) => [r.kategorie, r.cp, r.quelle]), [["K", 6, "plan"], ["HP", 4, "plan"]]);
   assert.equal(ausPlan(bs, rows).length, 0);
+});
+
+test("rows from the plan remember their catalog module", () => {
+  const b = { ...B("K", 5, "geplant"), modulCode: "XX0001" };
+  const [z] = ausPlan([b], []);
+  assert.equal(z.modulCode, "XX0001");
+  assert.equal(modulCodeVon(z, []), "XX0001", "survives a deleted Belegung");
+  const alt = { ...z, modulCode: undefined };
+  assert.equal(modulCodeVon(alt, [b]), "XX0001", "older rows resolve via the Belegung");
+  assert.equal(modulCodeVon({ ...alt, belegungId: undefined }, [b]), null);
 });
 
 test("fill open CP up to every target", () => {

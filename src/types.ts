@@ -159,6 +159,8 @@ export interface SpielZeile {
   quelle: "plan" | "platzhalter" | "manuell";
   /** Belegung this row was taken from ("Aus Plan übernehmen"). */
   belegungId?: number;
+  /** Catalog module of that Belegung, kept so the row still links to it if the Belegung goes away. */
+  modulCode?: string | null;
 }
 
 export interface Settings {

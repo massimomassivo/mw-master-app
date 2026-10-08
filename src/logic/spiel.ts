@@ -25,7 +25,15 @@ export function ausPlan(belegungen: Belegung[], vorhanden: SpielZeile[]): SpielZ
       note100: null,
       quelle: "plan" as const,
       belegungId: b.id,
+      modulCode: b.modulCode,
     }));
+}
+
+/** Catalog module a row belongs to: stored on the row, else via its Belegung (rows from before modulCode existed). */
+export function modulCodeVon(z: SpielZeile, belegungen: Belegung[]): string | null {
+  if (z.modulCode) return z.modulCode;
+  if (z.belegungId == null) return null;
+  return belegungen.find((b) => b.id === z.belegungId)?.modulCode ?? null;
 }
 
 /**

@@ -1,14 +1,17 @@
 // "Spielmodus": real grades fixed, assumed grades for the open CP, resulting average.
 // Laid out as one colour-coded card per category in several columns, so all
-// grades fit on one screen; a compact structure check sits on top.
+// grades fit on one screen; a compact structure check sits on top. Rows that
+// belong to a catalog module open its detail (description, Notenspiegel) on the right.
 import { useMemo, useState } from "react";
 import { erreichteLeistungen, formatCp, formatNote, kategorieVon, parseNote, strukturCheck, type BereichCheck, type CheckStatus } from "../logic/noten";
-import { alsLeistungen, ausPlan, neueId, offeneCpAuffuellen, spielErgebnis } from "../logic/spiel";
+import { referenztermin } from "../logic/notenspiegel";
+import { alsLeistungen, ausPlan, modulCodeVon, neueId, offeneCpAuffuellen, spielErgebnis } from "../logic/spiel";
 import { bestaetigen } from "../platform";
 import { useStore } from "../store";
-import type { Belegung, Kategorie, SpielZeile } from "../types";
+import type { Belegung, Kategorie, Modul, SpielZeile } from "../types";
 import { ERREICHT } from "../types";
-import { kategorieFarbe } from "./ui";
+import { ModulDetail } from "./ModulDetail";
+import { formatProzent, formatSchnitt, kategorieFarbe, Kennwert } from "./ui";
 
 const STATUS_PILL: Record<CheckStatus, { text: string; cls: string }> = {
   ok: { text: "OK", cls: "ok" },
@@ -18,7 +21,11 @@ const STATUS_PILL: Record<CheckStatus, { text: string; cls: string }> = {
 };
 
 export function Spielmodus() {
-  const { belegungen, regeln, spiel, setSpiel } = useStore();
+  const { belegungen, regeln, spiel, setSpiel, modulMap } = useStore();
+  const [detailCode, setDetailCode] = useState<string | null>(null);
+  const detailModul = detailCode ? modulMap.get(detailCode) ?? null : null;
+  const modulVon = (code: string | null | undefined) => (code ? modulMap.get(code) : undefined);
+  const info: InfoProps = { offen: detailCode, oeffnen: (code) => setDetailCode(detailCode === code ? null : code) };
   const [markiert, setMarkiert] = useState<Set<string>>(new Set());
   const [massNote, setMassNote] = useState("1,3");
   const [echteZeigen, setEchteZeigen] = useState(true);
@@ -165,6 +172,7 @@ export function Spielmodus() {
         ) : null}
       </div>
 
+      <div className={`spiel-main ${detailModul ? "with-detail" : ""}`}>
       <div className="spiel-board">
         {regeln.kategorien.map((k) => (
           <KategorieKarte
@@ -181,6 +189,9 @@ export function Spielmodus() {
             update={update}
             loeschen={(id) => void setSpiel(spiel.filter((x) => x.id !== id))}
             neu={() => neueZeile(k.id)}
+            modulVon={modulVon}
+            belegungen={belegungen}
+            info={info}
           />
         ))}
         {unbekannt.echte.length || unbekannt.spiel.length ? (
@@ -195,10 +206,35 @@ export function Spielmodus() {
             toggle={toggle}
             update={update}
             loeschen={(id) => void setSpiel(spiel.filter((x) => x.id !== id))}
+            modulVon={modulVon}
+            belegungen={belegungen}
+            info={info}
           />
         ) : null}
       </div>
+      {detailModul ? <ModulDetail modul={detailModul} onClose={() => setDetailCode(null)} /> : null}
+      </div>
     </div>
+  );
+}
+
+interface InfoProps {
+  /** Code of the module whose detail is open. */
+  offen: string | null;
+  oeffnen: (code: string) => void;
+}
+
+/** Button that opens the catalog detail; shows Ø bestanden if there is a Notenspiegel. Empty cell for rows without a catalog module. */
+function ModulInfo({ modul, info }: { modul?: Modul; info: InfoProps }) {
+  if (!modul) return <span />;
+  const ref = referenztermin(modul);
+  const title = ref
+    ? `Beschreibung und Prüfungsstatistik öffnen · Ø bestanden ${formatSchnitt(ref.kennzahlen.schnittBestanden)} · Durchfall ${formatProzent(ref.kennzahlen.durchfallquote)} · ${ref.ns.semester}${ref.anzahlTermine > 1 ? ` (${ref.anzahlTermine} Termine)` : ""}${ref.kleineStichprobe ? ` · nur ${ref.kennzahlen.angetreten} Angetretene` : ""}`
+    : "Beschreibung öffnen · noch keine Prüfungsstatistik";
+  return (
+    <button className={`ghost modul-info ${ref ? "hat-stat" : ""}`} aria-pressed={info.offen === modul.code} onClick={() => info.oeffnen(modul.code)} title={title} aria-label={`${modul.titel}: ${title}`}>
+      {ref ? <Kennwert r={ref}>Ø {formatSchnitt(ref.kennzahlen.schnittBestanden)}</Kennwert> : "ⓘ"}
+    </button>
   );
 }
 
@@ -256,6 +292,9 @@ function KategorieKarte({
   update,
   loeschen,
   neu,
+  modulVon,
+  belegungen,
+  info,
 }: {
   kat: Kategorie;
   farbe: string;
@@ -269,6 +308,9 @@ function KategorieKarte({
   update: (id: string, patch: Partial<SpielZeile>) => void;
   loeschen: (id: string) => void;
   neu?: () => void;
+  modulVon: (code: string | null | undefined) => Modul | undefined;
+  belegungen: Belegung[];
+  info: InfoProps;
 }) {
   const benotet = kat.zaehltZurNote;
   const st = bereich ? STATUS_PILL[bereich.status] : null;
@@ -322,6 +364,7 @@ function KategorieKarte({
               {b.titel}
               {b.unterbereich ? <span className="faint"> · {ubName(b.unterbereich)}</span> : null}
             </span>
+            <ModulInfo modul={modulVon(b.modulCode)} info={info} />
             <span className="mono small r">{formatCp(b.cp)}</span>
             <span className="mono note">{b.note100 == null ? "best." : formatNote(b.note100)}</span>
             <span />
@@ -337,6 +380,7 @@ function KategorieKarte({
               aria-label="Titel"
               title={`${z.titel}${z.quelle === "plan" ? " (aus dem Plan)" : z.quelle === "platzhalter" ? " (Platzhalter)" : ""}${z.unterbereich ? ` · ${ubName(z.unterbereich)}` : ""}`}
             />
+            <ModulInfo modul={modulVon(modulCodeVon(z, belegungen))} info={info} />
             <input className="cp" type="number" min={0.5} step={0.5} value={z.cp} onChange={(e) => update(z.id, { cp: Number(e.target.value) || 0 })} aria-label="CP" />
             {benotet ? (
               <select
