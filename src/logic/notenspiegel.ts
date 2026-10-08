@@ -98,10 +98,30 @@ export function chronologisch(liste: Notenspiegel[]): Notenspiegel[] {
   return [...liste].sort((a, b) => compareSemester(a.semester, b.semester));
 }
 
-/** The newest main exam (shown in tables); falls back to the newest of any kind. */
-export function neuesterHaupttermin(modul: Modul): Notenspiegel | null {
+/** Below this many Angetretene the key figures are flagged as not very meaningful. */
+export const MIN_ANGETRETENE = 15;
+
+export interface Referenztermin {
+  ns: Notenspiegel;
+  kennzahlen: Kennzahlen;
+  /** false = no main exam exists, the newest exam of any kind is used instead (shown as "Wdh."). */
+  istHaupttermin: boolean;
+  /** Fewer than MIN_ANGETRETENE people sat the exam. */
+  kleineStichprobe: boolean;
+  /** Number of exam dates of the module (all kinds). */
+  anzahlTermine: number;
+}
+
+/**
+ * The exam whose figures catalog table and Semesterplan show: the newest main
+ * exam; only if the module has none, the newest exam of any kind.
+ * null = no Notenspiegel at all. Docs/ANFORDERUNGEN.md 4.5.
+ */
+export function referenztermin(modul: Modul): Referenztermin | null {
   const liste = chronologisch(modul.notenspiegel ?? []);
   if (!liste.length) return null;
   const haupt = liste.filter((ns) => artVon(ns, modul) === "Haupttermin");
-  return (haupt.length ? haupt : liste).at(-1)!;
+  const ns = (haupt.length ? haupt : liste).at(-1)!;
+  const k = kennzahlen(ns);
+  return { ns, kennzahlen: k, istHaupttermin: haupt.length > 0, kleineStichprobe: k.angetreten < MIN_ANGETRETENE, anzahlTermine: liste.length };
 }

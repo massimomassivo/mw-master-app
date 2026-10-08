@@ -1,13 +1,13 @@
 // "Semesterplan": records per exam semester, drag & drop between semesters.
 import { useMemo, useState } from "react";
 import { formatCp, formatNote, strukturCheck, type Leistung } from "../logic/noten";
-import { kennzahlen, neuesterHaupttermin } from "../logic/notenspiegel";
+import { referenztermin } from "../logic/notenspiegel";
 import { OHNE_TERMIN, passtZumTurnus, semesterRange, VOR_MASTER } from "../logic/semester";
 import { useStore } from "../store";
 import type { Belegung } from "../types";
 import { BelegungDialog, leereBelegung } from "./BelegungDialog";
 import { StrukturListe } from "./Struktur";
-import { formatProzent, formatSchnitt, kategorieFarbe, StatusPill } from "./ui";
+import { formatProzent, formatSchnitt, kategorieFarbe, StatusPill, Kennwert, TerminHinweis } from "./ui";
 
 const RICHTWERT_CP = 30;
 
@@ -104,8 +104,7 @@ export function Plan() {
               <div className="column-body">
                 {items.map((b) => {
                   const m = b.modulCode ? modulMap.get(b.modulCode) : undefined;
-                  const ns = m ? neuesterHaupttermin(m) : null;
-                  const k = ns ? kennzahlen(ns) : null;
+                  const ref = m ? referenztermin(m) : null;
                   const turnusAnders = m && istSemester && !passtZumTurnus(m.turnus, sp.id);
                   return (
                     <div
@@ -128,9 +127,14 @@ export function Plan() {
                         <StatusPill status={b.status} />
                         {b.note100 != null ? <span className="mono">Note {formatNote(b.note100)}</span> : null}
                       </span>
-                      {k ? (
+                      {ref ? (
                         <span className="m">
-                          Ø {formatSchnitt(k.schnittBestanden)} · Durchfall {formatProzent(k.durchfallquote)}
+                          <span>
+                            <Kennwert r={ref}>
+                              Ø {formatSchnitt(ref.kennzahlen.schnittBestanden)} · Durchfall {formatProzent(ref.kennzahlen.durchfallquote)}
+                            </Kennwert>
+                            <TerminHinweis r={ref} />
+                          </span>
                         </span>
                       ) : null}
                       {turnusAnders ? <span className="m" style={{ color: "var(--warn)" }}>läuft laut Katalog im {m!.turnus}</span> : null}

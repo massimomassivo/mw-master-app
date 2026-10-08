@@ -1,11 +1,11 @@
 // "Katalog": all modules from the shared folder with filters, sorting and a detail panel.
 import { useMemo, useState } from "react";
 import { formatCp } from "../logic/noten";
-import { kennzahlen, neuesterHaupttermin } from "../logic/notenspiegel";
+import { referenztermin, type Referenztermin } from "../logic/notenspiegel";
 import { useStore } from "../store";
 import type { Modul } from "../types";
 import { ModulDetail } from "./ModulDetail";
-import { formatProzent, formatSchnitt, kategorieFarbe, KategorieBadge } from "./ui";
+import { formatProzent, formatSchnitt, kategorieFarbe, Kennwert, KategorieBadge, TerminHinweis } from "./ui";
 
 type SortKey = "titel" | "code" | "cp" | "turnus" | "schnitt" | "durchfall";
 
@@ -27,12 +27,8 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
   const sprachen = useMemo(() => [...new Set(module.map((m) => m.sprache).filter((x): x is string => !!x))].sort(), [module]);
 
   const stat = useMemo(() => {
-    const map = new Map<string, { schnitt: number | null; durchfall: number | null; termine: number }>();
-    for (const m of module) {
-      const ns = neuesterHaupttermin(m);
-      const k = ns ? kennzahlen(ns) : null;
-      map.set(m.code, { schnitt: k?.schnittBestanden ?? null, durchfall: k?.durchfallquote ?? null, termine: m.notenspiegel?.length ?? 0 });
-    }
+    const map = new Map<string, Referenztermin | null>();
+    for (const m of module) map.set(m.code, referenztermin(m));
     return map;
   }, [module]);
 
@@ -56,9 +52,9 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
         case "turnus":
           return m.turnus;
         case "schnitt":
-          return stat.get(m.code)?.schnitt ?? 99;
+          return stat.get(m.code)?.kennzahlen.schnittBestanden ?? 99;
         case "durchfall":
-          return stat.get(m.code)?.durchfall ?? 99;
+          return stat.get(m.code)?.kennzahlen.durchfallquote ?? 99;
         default:
           return m.titel.toLowerCase();
       }
@@ -121,7 +117,7 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
         <div>
           <div className="eyebrow">Gemeinsamer Katalog · {module.length} Module</div>
           <h1>Modulkatalog</h1>
-          <p className="lead">Nur lesbar. Ø und Durchfallquote vom neuesten Haupttermin; alle Termine in der Detailansicht.</p>
+          <p className="lead">Nur lesbar. Ø und Durchfallquote vom neuesten Haupttermin (ohne Haupttermin: vom neuesten Termin, „Wdh.“); alle Termine in der Detailansicht.</p>
         </div>
       </div>
 
@@ -234,10 +230,14 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
                         )}
                         {kompakt ? null : <td className="small">{turnusKurz(m)}</td>}
                         <td className="num">
-                          {formatSchnitt(s?.schnitt ?? null)}
-                          {s && s.termine > 1 ? <span className="faint small"> ({s.termine})</span> : null}
+                          {s ? <Kennwert r={s}>{formatSchnitt(s.kennzahlen.schnittBestanden)}</Kennwert> : formatSchnitt(null)}
+                          {s ? <TerminHinweis r={s} /> : null}
+                          {s && s.anzahlTermine > 1 ? <span className="faint small"> ({s.anzahlTermine})</span> : null}
                         </td>
-                        <td className="num">{formatProzent(s?.durchfall ?? null)}</td>
+                        <td className="num">
+                          {s ? <Kennwert r={s}>{formatProzent(s.kennzahlen.durchfallquote)}</Kennwert> : formatProzent(null)}
+                          {s ? <TerminHinweis r={s} ohneWarnung /> : null}
+                        </td>
                         <td className="c">{imPlan.has(m.code) ? "✓" : ""}</td>
                       </tr>
                     );

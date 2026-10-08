@@ -18,12 +18,12 @@
       "semester": "SS 25",
       "pruefungsdatum": null,
       "verteilung": {
-        "1.0": 10,
-        "1.3": 8,
-        "1.7": 4,
-        "2.0": 2
+        "1.0": 5,
+        "1.3": 4,
+        "1.7": 2,
+        "2.0": 1
       },
-      "nichtErschienen": 6,
+      "nichtErschienen": 2,
       "erfasstAm": "2026-10-01",
       "quelle": "erfunden"
     }

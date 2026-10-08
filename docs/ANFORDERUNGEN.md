@@ -129,7 +129,7 @@ Gerechnet wird nur über benotete Belegungen in Kategorien mit `zaehltZurNote: t
 
 - Spalten sind Semester: `WS 26/27`, `SS 27`, `WS 27/28`, … sowie `vor dem Master` (vorgezogene Mastermodule aus dem Bachelor) und `ohne Termin`. Das erste Semester stellt man in den Einstellungen ein, die Anzahl wächst nach Bedarf.
 - Gemeint ist das Semester, in dem die **Prüfung** geschrieben wird. Das muss nicht zum Turnus des Moduls passen: Man kann ein SS-Modul ins WS legen, z. B. wenn man im Moodle schon angemeldet ist. Weicht das Semester vom Turnus ab, zeigt die App nur einen dezenten Hinweis und blockiert nichts.
-- Pro Semester: CP-Summe mit Richtwert 30 und die Liste der Module mit Kategorie-Farbe, Status, Ø aus dem Notenspiegel und Durchfallquote.
+- Pro Semester: CP-Summe mit Richtwert 30 und die Liste der Module mit Kategorie-Farbe, Status, Ø aus dem Notenspiegel und Durchfallquote (Referenztermin, Semester und Warnung bei kleiner Stichprobe wie in 4.5).
 - Module per Drag & Drop oder Auswahlfeld verschieben.
 - Gesamtüberblick: CP pro Kategorie über alle Semester gegen die Regeln, wie die Leiste in der bisherigen Modulwahl-HTML.
 
@@ -159,7 +159,11 @@ Bewusst einfach: **Die App rechnet nichts zurück.** Man trägt vermutete Noten 
     - Vergleich: alle Termine als Tabelle untereinander, chronologisch sortiert. So sieht man Haupt- gegen Wiederholungstermin und die Entwicklung über die Jahre.
     - Verlauf: kleines Liniendiagramm für Ø bestanden und Durchfallquote über die Termine, ab zwei Terminen.
     - „Alle Termine zusammen“: Verteilungen addiert.
-    - In Katalogtabelle und Semesterplan stehen die Werte des neuesten Haupttermins, mit Hinweis auf die Anzahl der Termine.
+    - In Katalogtabelle und Semesterplan stehen Ø bestanden und Durchfallquote **eines Referenztermins**, mit Hinweis auf die Anzahl der Termine. Dafür gelten drei Regeln:
+      1. **Auswahl:** Referenztermin ist der neueste Haupttermin. Hat ein Modul keinen Haupttermin (nur Wiederholungen oder nur Termine mit Art „unbekannt“, z. B. bei Turnus `unregelmaessig`), ist es der neueste Termin, egal welcher Art. Die Auswahl steckt in einer einzigen Funktion (`referenztermin` in `src/logic/notenspiegel.ts`), die Katalogtabelle und Semesterplan gemeinsam nutzen.
+      2. **Semester:** Neben den Werten steht immer das Semester des Referenztermins, dezent und in kleinerer Schrift, z. B. „2,4 · WS 24/25“. Ist der Referenztermin kein Haupttermin (Fallback aus Regel 1), steht zusätzlich „Wdh.“ dabei.
+      3. **Kleine Stichprobe:** Haben weniger als 15 Personen den Referenztermin angetreten, zeigt die App die Werte trotzdem an, aber in der Warnfarbe und mit dem Tooltip „Nur n Angetretene, wenig aussagekräftig“; neben dem Ø steht zusätzlich ein Warnsymbol (⚠). Die Schwelle ist die Konstante `MIN_ANGETRETENE` (15), Angetretene = Σ `verteilung` ohne `nichtErschienen`.
+      Die Detailansicht ändert sich dadurch nicht.
     - Gibt es keine Daten, steht dort „Noch kein Notenspiegel“.
   - **Kommentare** aus den geteilten Daten, z. B. Erfahrungsberichte von Freunden. In der App nur lesbar.
   - Eigene private Notiz und der Knopf „Zum Plan hinzufügen“ mit Semesterauswahl.

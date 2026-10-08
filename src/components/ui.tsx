@@ -3,6 +3,7 @@ import { useEffect, type ReactNode } from "react";
 import { useStore } from "../store";
 import type { Status } from "../types";
 import { STATUS_LABEL } from "../types";
+import type { Referenztermin } from "../logic/notenspiegel";
 
 export function KategorieBadge({ id, unterbereich }: { id: string; unterbereich?: string | null }) {
   const { regeln } = useStore();
@@ -64,6 +65,36 @@ export function formatDatum(iso: string | null | undefined, mitZeit = false): st
   return mitZeit
     ? d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
     : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+const wenigText = (r: Referenztermin) => `Nur ${r.kennzahlen.angetreten} Angetretene, wenig aussagekräftig`;
+
+/** A key figure; in the warning colour with a tooltip when the reference exam has too few Angetretene. */
+export function Kennwert({ r, children }: { r: Referenztermin; children: ReactNode }) {
+  return r.kleineStichprobe ? (
+    <span className="wenig" title={wenigText(r)}>
+      {children}
+    </span>
+  ) : (
+    <>{children}</>
+  );
+}
+
+/** Where a table value comes from: semester of the reference exam, "Wdh." for the fallback, warning for small samples. */
+export function TerminHinweis({ r, ohneWarnung = false }: { r: Referenztermin; ohneWarnung?: boolean }) {
+  const text = wenigText(r);
+  return (
+    <span className="faint small termin-hinweis">
+      {" · "}
+      {r.ns.semester}
+      {r.istHaupttermin ? null : <span title="Kein Haupttermin vorhanden, es gilt der neueste Termin"> · Wdh.</span>}
+      {r.kleineStichprobe && !ohneWarnung ? (
+        <span className="warn-icon" role="img" aria-label={text} title={text}>
+          {" ⚠"}
+        </span>
+      ) : null}
+    </span>
+  );
 }
 
 export function formatProzent(x: number | null): string {

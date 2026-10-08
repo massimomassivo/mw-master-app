@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Modul, Notenspiegel } from "../types";
-import { artVon, chronologisch, kennzahlen, neuesterHaupttermin, pruefeGegenTumonline, summiere } from "./notenspiegel";
+import { artVon, chronologisch, kennzahlen, MIN_ANGETRETENE, pruefeGegenTumonline, referenztermin, summiere } from "./notenspiegel";
 
 // Invented numbers. The formulas were checked against real TUMonline exports
 // (the published averages and fail rates came out exactly); real exam
@@ -73,6 +73,56 @@ test("main/repeat exam and newest main exam", () => {
   };
   assert.equal(artVon(modul.notenspiegel![1], modul), "Wiederholung");
   assert.equal(artVon({ ...modul.notenspiegel![1], art: "Haupttermin" }, modul), "Haupttermin");
-  assert.equal(neuesterHaupttermin(modul)?.termin, "FA 25W");
-  assert.equal(neuesterHaupttermin({ ...modul, notenspiegel: [] }), null);
+});
+
+// ---- reference exam shown in catalog table and Semesterplan ----
+
+const modulMit = (turnus: Modul["turnus"], notenspiegel?: Notenspiegel[]): Modul => ({ code: "XX1", titel: "x", cp: 5, kategorien: ["K"], turnus, notenspiegel });
+
+test("reference exam: the newest of several main exams wins", () => {
+  const m = modulMit("WS", [ns("FA 25W", "WS 25/26", { "2.0": 1 }, 0), ns("FA 24W", "WS 24/25", { "1.0": 1 }, 0), ns("FA 23W", "WS 23/24", { "3.0": 1 }, 0)]);
+  const r = referenztermin(m)!;
+  assert.equal(r.ns.termin, "FA 25W");
+  assert.equal(r.istHaupttermin, true);
+  assert.equal(r.anzahlTermine, 3);
+});
+
+test("reference exam: an older main exam beats a newer repeat", () => {
+  const m = modulMit("WS", [ns("FA 24W", "WS 24/25", { "1.0": 1 }, 0), ns("FA 25S", "SS 25", { "2.0": 1 }, 0)]);
+  const r = referenztermin(m)!;
+  assert.equal(r.ns.termin, "FA 24W");
+  assert.equal(r.istHaupttermin, true);
+});
+
+test("reference exam: only repeats fall back to the newest exam", () => {
+  const m = modulMit("WS", [ns("FA 24S", "SS 24", { "1.0": 1 }, 0), ns("FA 25S", "SS 25", { "2.0": 1 }, 0)]);
+  const r = referenztermin(m)!;
+  assert.equal(r.ns.termin, "FA 25S");
+  assert.equal(r.istHaupttermin, false);
+});
+
+test("reference exam: irregular module (art unknown) falls back, explicit art still wins", () => {
+  const m = modulMit("unregelmaessig", [ns("A", "WS 24/25", { "1.0": 1 }, 0), ns("B", "SS 25", { "2.0": 1 }, 0)]);
+  const r = referenztermin(m)!;
+  assert.equal(r.ns.termin, "B");
+  assert.equal(r.istHaupttermin, false);
+  const m2 = modulMit("unregelmaessig", [ns("A", "WS 24/25", { "1.0": 1 }, 0, { art: "Haupttermin" }), ns("B", "SS 25", { "2.0": 1 }, 0)]);
+  assert.equal(referenztermin(m2)!.ns.termin, "A");
+  assert.equal(referenztermin(m2)!.istHaupttermin, true);
+});
+
+test("reference exam: small sample warning below 15 Angetretene", () => {
+  assert.equal(MIN_ANGETRETENE, 15);
+  const mitAngetreten = (n: number) => referenztermin(modulMit("WS", [ns("FA", "WS 24/25", { "2.0": n - 1, "5.0": 1 }, 40)]))!;
+  const r14 = mitAngetreten(14);
+  assert.equal(r14.kennzahlen.angetreten, 14);
+  assert.equal(r14.kleineStichprobe, true);
+  const r15 = mitAngetreten(15);
+  assert.equal(r15.kennzahlen.angetreten, 15); // nichtErschienen (40) does not count
+  assert.equal(r15.kleineStichprobe, false);
+});
+
+test("reference exam: none without a Notenspiegel", () => {
+  assert.equal(referenztermin(modulMit("WS")), null);
+  assert.equal(referenztermin(modulMit("WS", [])), null);
 });

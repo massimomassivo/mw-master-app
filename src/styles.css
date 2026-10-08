@@ -155,6 +155,9 @@ label.field > input, label.field > select, label.field > textarea { color: var(-
 .chip { border-radius: 999px; padding: 4px 11px; font-size: 12.5px; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
+.warn-icon, .wenig { color: var(--warn); cursor: help; }
+td.num .termin-hinweis { font-family: var(--sans); }
+
 .chip.kat { display: inline-flex; align-items: center; gap: 6px; }
 .chip.kat .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
 .chip.kat[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); border-color: var(--accent); }
