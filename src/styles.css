@@ -155,6 +155,12 @@ label.field > input, label.field > select, label.field > textarea { color: var(-
 .chip { border-radius: 999px; padding: 4px 11px; font-size: 12.5px; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
+.chip.kat { display: inline-flex; align-items: center; gap: 6px; }
+.chip.kat .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.chip.kat[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); border-color: var(--accent); }
+.chip.kat[aria-pressed="false"] { color: var(--faint); }
+.chip.kat[aria-pressed="false"] .dot { opacity: 0.3; }
+
 .badge {
   display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap;
   border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px 1px 6px; color: var(--ink); background: var(--surface);
@@ -211,6 +217,41 @@ tr.fixed td { color: var(--muted); }
 .check-item .meter { grid-column: 2 / 5; }
 .check-item.sub { padding-left: 22px; font-size: 12.5px; color: var(--muted); }
 .check-item .swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ---------------- Spielmodus ---------------- */
+.mini-check { display: grid; gap: 8px; }
+.mini-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 84px 70px; gap: 12px; align-items: center; }
+.mini-row .pill { justify-self: start; }
+.stack-bar { display: flex; height: 12px; background: var(--soft); border-radius: 3px; overflow: hidden; }
+.stack-bar > span { display: block; height: 100%; border-right: 1px solid var(--surface); }
+.spiel-board { columns: 340px; column-gap: 14px; }
+.kat-card {
+  break-inside: avoid; margin-bottom: 14px; background: var(--surface); border: 1px solid var(--line);
+  border-top: 4px solid var(--kat); border-radius: var(--radius); padding: 8px 12px 10px; display: grid; gap: 6px;
+}
+.kat-card header { display: grid; gap: 6px; }
+.kat-title { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.kat-title .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--kat); flex: none; }
+.meter.kat { height: 4px; }
+.meter.kat > span { background: var(--kat); }
+.meter.kat.ueber > span { background: var(--bad); }
+.kat-rows { display: grid; gap: 2px; }
+.kat-row { display: grid; grid-template-columns: 16px minmax(0, 1fr) 50px 62px 24px; gap: 6px; align-items: center; font-size: 12.5px; min-height: 28px; border-radius: 5px; }
+.kat-row input, .kat-row select { font-size: 12.5px; padding: 3px 6px; }
+.kat-row input.t { border-color: transparent; background: transparent; width: 100%; }
+.kat-row input.t:hover, .kat-row input.t:focus { border-color: var(--line); background: var(--surface); }
+.kat-row input.cp { width: 100%; font-family: var(--mono); text-align: right; padding-right: 2px; }
+.kat-row .note { width: 100%; text-align: center; }
+.kat-row select.note.leer { border-style: dashed; color: var(--faint); }
+.kat-row .r { text-align: right; padding-right: 8px; }
+.kat-row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kat-row.fixed { color: var(--muted); }
+.kat-row.fixed .lock { color: var(--kat); font-size: 9px; text-align: center; }
+.kat-row.fixed > .t { padding-left: 7px; }
+.kat-row.platzhalter input.t { font-style: italic; color: var(--muted); }
+.kat-row.marked { background: var(--accent-soft); }
+.kat-row button.icon { padding: 2px 5px; color: var(--faint); }
+.kat-title button.icon { padding: 1px 6px; font-size: 15px; color: var(--muted); }
 
 /* ---------------- plan board ---------------- */
 .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 6px; }

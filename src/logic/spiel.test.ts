@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Belegung, SpielZeile } from "../types";
-import { erreichteLeistungen } from "./noten";
+import { erreichteLeistungen, strukturCheck } from "./noten";
 import { FALLBACK_REGELN as R } from "./shared";
-import { ausPlan, offeneCpAuffuellen, spielErgebnis } from "./spiel";
+import { alsLeistungen, ausPlan, offeneCpAuffuellen, spielErgebnis } from "./spiel";
 
 let nextId = 1;
 const B = (kategorie: string, cp: number, status: Belegung["status"], note: number | null = null): Belegung => ({
@@ -49,6 +49,20 @@ test("fill open CP up to every target", () => {
   assert.equal(total, 120);
   // Running it again adds nothing.
   assert.equal(offeneCpAuffuellen(echte, rows, R).length, 0);
+});
+
+test("placeholders fill the sub-area minimums first", () => {
+  const rows = offeneCpAuffuellen([], [], R);
+  const ue = rows.filter((r) => r.kategorie === "UE").map((r) => [r.unterbereich, r.cp]);
+  assert.deepEqual(ue, [["UE-ETHIK", 3], ["UE-WEITERE", 2]]);
+  const check = strukturCheck(alsLeistungen(rows), R);
+  assert.ok(check.kategorien.every((k) => k.status !== "offen" && k.status !== "ueber"));
+  assert.equal(check.gesamt.status, "ok");
+});
+
+test("rows from the plan keep the sub-area", () => {
+  const b = { ...B("UE", 3, "geplant"), unterbereich: "UE-ETHIK" };
+  assert.equal(ausPlan([b], [])[0].unterbereich, "UE-ETHIK");
 });
 
 test("group remainder respects category maximums", () => {
