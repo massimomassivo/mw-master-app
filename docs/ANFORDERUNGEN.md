@@ -150,6 +150,7 @@ Bewusst einfach: **Die App rechnet nichts zurück.** Man trägt vermutete Noten 
 ### 4.5 Modulkatalog
 
 - Tabelle aller Module aus dem geteilten Ordner. Filter: Kategorie (Mehrfachauswahl als Chips, mit „Alle wählen“ und „Alle abwählen“; ein Modul passt, wenn eine seiner Kategorien gewählt ist), Themen-Tag, Turnus (WS/SS), Angebot im gewählten Semester, Sprache, Freitextsuche (Titel, Nummer, Dozent).
+- Über der Tabelle steht immer, wie viele Module die aktuelle Suche und die Filter ergeben und wie viele davon eine Prüfungsstatistik (mindestens einen Notenspiegel) haben, z. B. „12 von 734 Modulen · 5 mit Prüfungsstatistik (42 %)“; ohne Filter „734 Module · 210 mit Prüfungsstatistik (29 %)“.
 - Spalten: Titel, Nummer, CP, Kategorie(n), Turnus, Sprache, Ø bestanden, Durchfallquote, „im Plan“. Alle Spalten sind sortierbar.
 - Detailansicht eines Moduls:
   - Kurzbeschreibung, Prüfungsform, Leitung, Sprache, CP, erlaubte Kategorien, Tags

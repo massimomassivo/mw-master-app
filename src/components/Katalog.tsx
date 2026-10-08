@@ -67,6 +67,9 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
     });
   }, [module, q, kats, tag, turnus, angebot, sprache, sort, stat]);
 
+  const mitStatistik = rows.filter((m) => stat.get(m.code)).length;
+  const gefiltert = rows.length !== module.length;
+
   const alleKats = regeln.kategorien.map((k) => k.id);
   const katAn = (id: string) => !kats || kats.has(id);
   const toggleKat = (id: string) =>
@@ -180,6 +183,16 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
             ))}
           </div>
         ) : null}
+        <p className="small muted" aria-live="polite">
+          <strong>{rows.length}</strong>
+          {gefiltert ? ` von ${module.length} Modulen` : rows.length === 1 ? " Modul" : " Module"}
+          {rows.length ? (
+            <>
+              {" · "}
+              <strong>{mitStatistik}</strong> mit Prüfungsstatistik ({formatProzent(mitStatistik / rows.length)})
+            </>
+          ) : null}
+        </p>
       </div>
 
       <div className={`catalog ${selModul ? "with-detail" : ""}`}>
