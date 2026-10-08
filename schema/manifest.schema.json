@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mw-master-app/schema/manifest.schema.json",
+  "title": "manifest.json",
+  "description": "Kopf der geteilten Daten. Wird von Claude immer zuletzt geschrieben.",
+  "type": "object",
+  "required": ["schemaVersion", "updatedAt", "studiengang"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "MAJOR.MINOR. Neue MINOR-Version = nur optionale Felder dazu, neue MAJOR-Version = inkompatibel."
+    },
+    "updatedAt": { "type": "string", "minLength": 10, "description": "ISO-Zeitstempel der letzten Änderung" },
+    "studiengang": { "type": "string" },
+    "studienplan": { "type": "string" },
+    "fpso": { "type": "string" },
+    "anzahlModule": { "type": "integer", "minimum": 0 },
+    "hinweis": { "type": "string" }
+  },
+  "additionalProperties": true
+}

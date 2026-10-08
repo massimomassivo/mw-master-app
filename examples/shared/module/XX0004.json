@@ -1,0 +1,35 @@
+{
+  "code": "XX0004",
+  "titel": "Beispiel: Werkstoffe im Leichtbau",
+  "cp": 5,
+  "kategorien": [
+    "G"
+  ],
+  "tags": [
+    "luftraum"
+  ],
+  "turnus": "WS+SS",
+  "sprache": "DE",
+  "leitung": "Prof. Muster",
+  "kurzbeschreibung": "Erfundenes Modul. Faserverbunde, Titan- und Aluminiumlegierungen, Schadenstoleranz.",
+  "links": {
+    "modul": "https://example.org/modul/XX0004",
+    "lehrveranstaltungen": [
+      {
+        "semester": "WS 26/27",
+        "url": "https://example.org/lv/XX0004-ws2627"
+      }
+    ]
+  },
+  "angebot": [
+    {
+      "semester": "WS 26/27",
+      "status": "bestaetigt"
+    },
+    {
+      "semester": "SS 27",
+      "status": "erwartet"
+    }
+  ],
+  "stand": "2026-10-07"
+}

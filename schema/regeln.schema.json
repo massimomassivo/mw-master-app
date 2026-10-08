@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mw-master-app/schema/regeln.schema.json",
+  "title": "regeln.json",
+  "description": "Struktur und Rechenregeln des Studiengangs. Die App hat keine dieser Regeln fest eingebaut.",
+  "type": "object",
+  "required": ["gesamtCp", "kategorien", "notenstufen", "zeugnisnote", "praedikate"],
+  "properties": {
+    "gesamtCp": { "type": "number", "exclusiveMinimum": 0 },
+    "kategorien": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "kurz", "zaehltZurNote"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9-]*$" },
+          "name": { "type": "string" },
+          "kurz": { "type": "string" },
+          "gruppe": { "type": ["string", "null"] },
+          "minCp": { "type": ["number", "null"], "minimum": 0 },
+          "maxCp": { "type": ["number", "null"], "minimum": 0 },
+          "zaehltZurNote": { "type": "boolean" },
+          "genauEinModul": { "type": "boolean" },
+          "unterbereiche": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9-]*$" },
+                "name": { "type": "string" },
+                "minCp": { "type": ["number", "null"], "minimum": 0 }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "gruppen": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "sollCp"],
+        "properties": {
+          "id": { "type": "string" },
+          "sollCp": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "platzhalterCp": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0 }
+    },
+    "notenstufen": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number", "minimum": 1, "maximum": 5 }
+    },
+    "zeugnisnote": { "enum": ["abschneiden_1_nachkommastelle"] },
+    "praedikate": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["bis", "name"],
+        "properties": {
+          "bis": { "type": "number" },
+          "name": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "auszeichnung": {
+      "type": "object",
+      "required": ["bis"],
+      "properties": {
+        "bis": { "type": "number" },
+        "bezogenAuf": { "enum": ["zeugnisnote"] }
+      },
+      "additionalProperties": true
+    },
+    "fristen": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "bisFachsemester", "kategorien", "minModule"],
+        "properties": {
+          "text": { "type": "string" },
+          "bisFachsemester": { "type": "integer", "minimum": 1 },
+          "kategorien": { "type": "array", "items": { "type": "string" } },
+          "minModule": { "type": "integer", "minimum": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "farben": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+    }
+  },
+  "additionalProperties": true
+}

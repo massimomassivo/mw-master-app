@@ -1,0 +1,23 @@
+[package]
+name = "mw-master-app"
+version = "0.1.0"
+description = "Noten, Notenspiegel und Modulplanung für den M.Sc. Maschinenwesen (TUM)"
+authors = ["Maximilian Bergt"]
+edition = "2021"
+
+[lib]
+name = "mw_master_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+mwmaster-core = { path = "../crates/mwmaster-core" }
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

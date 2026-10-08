@@ -1,0 +1,30 @@
+{
+  "code": "XX0005",
+  "titel": "Beispiel: Praktikum Windkanal",
+  "cp": 4,
+  "kategorien": [
+    "HP"
+  ],
+  "tags": [
+    "aero"
+  ],
+  "turnus": "WS+SS",
+  "sprache": "DE",
+  "kurzbeschreibung": "Erfundenes Praktikum. Messungen im Windkanal, Druckverteilung, PIV.",
+  "links": {
+    "modul": "https://example.org/modul/XX0005",
+    "lehrveranstaltungen": [
+      {
+        "semester": "WS 26/27",
+        "url": "https://example.org/lv/XX0005-ws2627"
+      }
+    ]
+  },
+  "kommentare": [
+    {
+      "text": "Erfundener Kommentar: Viel Aufwand für 4 CP, aber lehrreich.",
+      "datum": "2026-07-27"
+    }
+  ],
+  "stand": "2026-10-07"
+}

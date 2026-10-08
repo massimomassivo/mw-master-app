@@ -1,0 +1,174 @@
+{
+  "gesamtCp": 120,
+  "kategorien": [
+    {
+      "id": "G",
+      "name": "Ingenieurwissenschaftliche Grundlagen",
+      "kurz": "Grundlagen",
+      "gruppe": "Mastermodule",
+      "minCp": 20,
+      "maxCp": null,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "K",
+      "name": "Kernfächer des Maschinenwesens",
+      "kurz": "Kernfach",
+      "gruppe": "Mastermodule",
+      "minCp": null,
+      "maxCp": 40,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "A",
+      "name": "Angrenzende Fachgebiete",
+      "kurz": "Angrenzend",
+      "gruppe": "Mastermodule",
+      "minCp": null,
+      "maxCp": 15,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "F",
+      "name": "Ingenieurwissenschaftliche Flexibilisierung",
+      "kurz": "Flexibilisierung",
+      "gruppe": "Mastermodule",
+      "minCp": null,
+      "maxCp": 15,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "HP",
+      "name": "Hochschulpraktika",
+      "kurz": "Praktikum",
+      "gruppe": null,
+      "minCp": 8,
+      "maxCp": null,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "IE",
+      "name": "International Experience / Interdisziplinäre Ergänzungsfächer",
+      "kurz": "Intern. Exp.",
+      "gruppe": null,
+      "minCp": 6,
+      "maxCp": null,
+      "zaehltZurNote": true
+    },
+    {
+      "id": "UE",
+      "name": "Überfachliche Ergänzung",
+      "kurz": "Überfachlich",
+      "gruppe": null,
+      "minCp": 5,
+      "maxCp": null,
+      "zaehltZurNote": false,
+      "unterbereiche": [
+        {
+          "id": "UE-ETHIK",
+          "name": "Ethik des menschzentrierten Ingenieurwesens",
+          "minCp": 3
+        },
+        {
+          "id": "UE-WEITERE",
+          "name": "Weitere Angebote zur Überfachlichen Ergänzung",
+          "minCp": 2
+        }
+      ]
+    },
+    {
+      "id": "FP",
+      "name": "Forschungspraxis",
+      "kurz": "Forschungspraxis",
+      "gruppe": null,
+      "minCp": 11,
+      "maxCp": 11,
+      "zaehltZurNote": true,
+      "genauEinModul": true
+    },
+    {
+      "id": "MA",
+      "name": "Master's Thesis",
+      "kurz": "Thesis",
+      "gruppe": null,
+      "minCp": 30,
+      "maxCp": 30,
+      "zaehltZurNote": true
+    }
+  ],
+  "gruppen": [
+    {
+      "id": "Mastermodule",
+      "sollCp": 60
+    }
+  ],
+  "platzhalterCp": {
+    "G": 5,
+    "K": 5,
+    "A": 5,
+    "F": 5,
+    "HP": 4,
+    "IE": 3,
+    "UE": 3,
+    "FP": 11,
+    "MA": 30
+  },
+  "notenstufen": [
+    1.0,
+    1.3,
+    1.7,
+    2.0,
+    2.3,
+    2.7,
+    3.0,
+    3.3,
+    3.7,
+    4.0
+  ],
+  "zeugnisnote": "abschneiden_1_nachkommastelle",
+  "praedikate": [
+    {
+      "bis": 1.5,
+      "name": "sehr gut"
+    },
+    {
+      "bis": 2.5,
+      "name": "gut"
+    },
+    {
+      "bis": 3.5,
+      "name": "befriedigend"
+    },
+    {
+      "bis": 4.0,
+      "name": "ausreichend"
+    }
+  ],
+  "auszeichnung": {
+    "bis": 1.2,
+    "bezogenAuf": "zeugnisnote"
+  },
+  "fristen": [
+    {
+      "text": "Bis Ende des 2. Fachsemesters mindestens ein Modul aus Grundlagen, Kernfächern oder Angrenzenden Fachgebieten bestehen (§ 38 Abs. 2 FPSO)",
+      "bisFachsemester": 2,
+      "kategorien": [
+        "G",
+        "K",
+        "A"
+      ],
+      "minModule": 1
+    }
+  ],
+  "farben": {
+    "G": "#1d5fd1",
+    "K": "#0f766e",
+    "A": "#8a4fd0",
+    "F": "#b0572a",
+    "HP": "#a1690a",
+    "IE": "#2f7d8f",
+    "UE": "#6b7280",
+    "FP": "#9d3b6b",
+    "MA": "#374151"
+  }
+}

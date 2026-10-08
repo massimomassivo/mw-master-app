@@ -1,0 +1,185 @@
+// Shared types. The shapes of the shared data mirror schema/*.schema.json;
+// change both together (and bump the schema version, see docs/ANFORDERUNGEN.md 5.2).
+
+// ---------------- shared data (read-only, from the OneDrive folder) ----------------
+
+export interface Manifest {
+  schemaVersion: string;
+  updatedAt: string;
+  studiengang: string;
+  studienplan?: string;
+  fpso?: string;
+  anzahlModule?: number;
+  hinweis?: string;
+}
+
+export interface Unterbereich {
+  id: string;
+  name: string;
+  minCp?: number | null;
+}
+
+export interface Kategorie {
+  id: string;
+  name: string;
+  kurz: string;
+  gruppe?: string | null;
+  minCp?: number | null;
+  maxCp?: number | null;
+  zaehltZurNote: boolean;
+  genauEinModul?: boolean;
+  unterbereiche?: Unterbereich[];
+}
+
+export interface Frist {
+  text: string;
+  bisFachsemester: number;
+  kategorien: string[];
+  minModule: number;
+}
+
+export interface Regeln {
+  gesamtCp: number;
+  kategorien: Kategorie[];
+  gruppen?: { id: string; sollCp: number }[];
+  platzhalterCp?: Record<string, number>;
+  notenstufen: number[];
+  zeugnisnote: "abschneiden_1_nachkommastelle";
+  praedikate: { bis: number; name: string }[];
+  auszeichnung?: { bis: number; bezogenAuf?: "zeugnisnote" };
+  fristen?: Frist[];
+  farben?: Record<string, string>;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+}
+
+export type Turnus = "WS" | "SS" | "WS+SS" | "unregelmaessig";
+export type TerminArt = "Haupttermin" | "Wiederholung" | "unbekannt";
+
+export interface Notenspiegel {
+  termin: string;
+  semester: string;
+  art?: TerminArt;
+  pruefungsdatum?: string | null;
+  angemeldet?: number;
+  /** Count per grade step, keys "1.0" … "5.0" (without "nicht erschienen"). */
+  verteilung: Record<string, number>;
+  nichtErschienen: number;
+  /** Numbers as read off the TUMonline screenshot; only used to check the extraction. */
+  tumonline?: { angetreten?: number; quoteNegativ?: number; schnittGesamt?: number; schnittBestanden?: number };
+  erfasstAm?: string;
+  quelle?: string;
+}
+
+export interface Kommentar {
+  text: string;
+  datum?: string;
+  von?: string;
+}
+
+export interface Modul {
+  code: string;
+  titel: string;
+  titelEn?: string;
+  cp: number;
+  kategorien: string[];
+  unterbereich?: string | null;
+  tags?: string[];
+  turnus: Turnus;
+  sprache?: string;
+  leitung?: string;
+  kurzbeschreibung?: string;
+  pruefung?: string;
+  links?: { modul?: string; lehrveranstaltungen?: { semester: string; url: string }[] };
+  angebot?: { semester: string; status: "bestaetigt" | "erwartet" }[];
+  notenspiegel?: Notenspiegel[];
+  kommentare?: Kommentar[];
+  stand?: string;
+  quellen?: string[];
+}
+
+export interface SharedData {
+  manifest: Manifest;
+  regeln: Regeln;
+  tags: Tag[];
+  module: Modul[];
+  /** When the app last read the folder successfully (ISO). */
+  gelesenAm: string;
+}
+
+/** Raw result of reading the shared folder (Rust `shared_read`). */
+export interface SharedRead {
+  root: string;
+  files: { name: string; content: string }[];
+  errors: { name: string; error: string }[];
+}
+
+// ---------------- private data (local SQLite) ----------------
+
+export type Status = "idee" | "geplant" | "angemeldet" | "bestanden" | "anerkannt" | "nicht_bestanden";
+
+export interface Belegung {
+  id: number;
+  /** Code from the catalog, or null for a free entry (e.g. recognised course from abroad). */
+  modulCode: string | null;
+  titel: string;
+  cp: number;
+  kategorie: string;
+  unterbereich: string | null;
+  /** "WS 26/27", "SS 27", "vor" (before the master) or "ohne" (no term yet). */
+  semester: string;
+  status: Status;
+  /** Grade in hundredths (1,3 -> 130); null = no grade. */
+  note100: number | null;
+  notiz: string;
+  sortOrder: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface SpielZeile {
+  id: string;
+  titel: string;
+  kategorie: string;
+  cp: number;
+  /** Assumed grade in hundredths; null = not filled in yet. */
+  note100: number | null;
+  quelle: "plan" | "platzhalter" | "manuell";
+  /** Belegung this row was taken from ("Aus Plan übernehmen"). */
+  belegungId?: number;
+}
+
+export interface Settings {
+  /** First master semester, e.g. "WS 26/27". */
+  erstesSemester: string;
+  /** How many semesters the plan shows (grows on demand). */
+  anzahlSemester: number;
+  sharedPath: string | null;
+  backupDir: string | null;
+  einrichtungFertig: boolean;
+}
+
+export const DEFAULT_SETTINGS: Settings = {
+  erstesSemester: "WS 26/27",
+  anzahlSemester: 4,
+  sharedPath: null,
+  backupDir: null,
+  einrichtungFertig: false,
+};
+
+export const STATUS_LABEL: Record<Status, string> = {
+  idee: "Idee",
+  geplant: "geplant",
+  angemeldet: "angemeldet",
+  bestanden: "bestanden",
+  anerkannt: "anerkannt",
+  nicht_bestanden: "nicht bestanden",
+};
+
+/** Statuses that count as achieved (CP and, if graded, the average). */
+export const ERREICHT: Status[] = ["bestanden", "anerkannt"];
+/** Statuses of modules that are still open. */
+export const OFFEN: Status[] = ["idee", "geplant", "angemeldet"];

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "aero",
+    "name": "Aerodynamik"
+  },
+  {
+    "id": "cfd",
+    "name": "CFD & Numerik"
+  },
+  {
+    "id": "stroem",
+    "name": "Strömungsmechanik"
+  },
+  {
+    "id": "thermo",
+    "name": "Thermofluide"
+  },
+  {
+    "id": "luftraum",
+    "name": "Luft- & Raumfahrt"
+  },
+  {
+    "id": "ethik",
+    "name": "Ethik"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "code": "XX0007",
+  "titel": "Beispiel: Technikethik",
+  "cp": 3,
+  "kategorien": [
+    "UE"
+  ],
+  "unterbereich": "UE-ETHIK",
+  "tags": [
+    "ethik"
+  ],
+  "turnus": "WS+SS",
+  "sprache": "DE",
+  "kurzbeschreibung": "Erfundenes Ethik-Modul (Studienleistung, unbenotet).",
+  "stand": "2026-10-07"
+}

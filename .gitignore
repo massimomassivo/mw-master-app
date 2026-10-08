@@ -1,0 +1,18 @@
+node_modules
+dist
+src-tauri/target
+src-tauri/gen
+target
+*.log
+.DS_Store
+
+# Never commit real data. The shared catalog lives in OneDrive, private data
+# in the app data folder. Only the invented sample data in examples/ belongs here.
+/shared/
+_eingang/
+_quellen/
+_privat/
+*.db
+*-backup.json
+# Updater signing key (create with `npx tauri signer generate`)
+*.key
