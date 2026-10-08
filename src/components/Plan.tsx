@@ -1,4 +1,5 @@
 // "Semesterplan": records per exam semester, drag & drop between semesters.
+// Cards of catalog modules open the catalog detail on the right (ⓘ).
 import { useMemo, useState } from "react";
 import { formatCp, formatNote, strukturCheck, type Leistung } from "../logic/noten";
 import { referenztermin } from "../logic/notenspiegel";
@@ -6,8 +7,9 @@ import { OHNE_TERMIN, passtZumTurnus, semesterRange, VOR_MASTER } from "../logic
 import { useStore } from "../store";
 import type { Belegung } from "../types";
 import { BelegungDialog, leereBelegung } from "./BelegungDialog";
+import { ModulDetail } from "./ModulDetail";
 import { StrukturListe } from "./Struktur";
-import { formatProzent, formatSchnitt, kategorieFarbe, StatusPill, Kennwert, TerminHinweis } from "./ui";
+import { formatProzent, formatSchnitt, kategorieFarbe, StatusPill, Kennwert, ModulInfo, TerminHinweis, type InfoProps } from "./ui";
 
 const RICHTWERT_CP = 30;
 
@@ -16,6 +18,9 @@ export function Plan() {
   const [edit, setEdit] = useState<Belegung | null>(null);
   const [drag, setDrag] = useState<number | null>(null);
   const [over, setOver] = useState<string | null>(null);
+  const [detailCode, setDetailCode] = useState<string | null>(null);
+  const detailModul = detailCode ? modulMap.get(detailCode) ?? null : null;
+  const info: InfoProps = { offen: detailCode, oeffnen: (code) => setDetailCode(detailCode === code ? null : code) };
 
   const semester = semesterRange(settings.erstesSemester, settings.anzahlSemester);
   const spalten = [
@@ -66,6 +71,7 @@ export function Plan() {
         </div>
       </div>
 
+      <div className={`plan-main ${detailModul ? "with-detail" : ""}`}>
       <div className="board">
         {spalten.map((sp) => {
           const items = belegungen.filter((b) => b.semester === sp.id);
@@ -77,13 +83,20 @@ export function Plan() {
               className={`column ${over === sp.id ? "drop" : ""}`}
               onDragOver={(e) => {
                 e.preventDefault();
-                setOver(sp.id);
+                e.dataTransfer.dropEffect = "move";
+                if (over !== sp.id) setOver(sp.id);
               }}
-              onDragLeave={() => setOver((o) => (o === sp.id ? null : o))}
+              onDragLeave={(e) => {
+                // ignore moving onto a child element (card, header)
+                if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+                setOver((o) => (o === sp.id ? null : o));
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 setOver(null);
-                const id = Number(e.dataTransfer.getData("text/plain"));
+                // some WebViews hand out no data on drop; the dragged id is also kept in state
+                const id = Number(e.dataTransfer.getData("text/plain")) || drag;
+                setDrag(null);
                 if (id) void verschiebe(id, sp.id);
               }}
             >
@@ -114,13 +127,20 @@ export function Plan() {
                       draggable
                       onDragStart={(e) => {
                         e.dataTransfer.setData("text/plain", String(b.id));
+                        e.dataTransfer.effectAllowed = "move";
                         setDrag(b.id);
                       }}
-                      onDragEnd={() => setDrag(null)}
+                      onDragEnd={() => {
+                        setDrag(null);
+                        setOver(null);
+                      }}
                       onClick={() => setEdit(b)}
                       title="Klicken zum Bearbeiten, ziehen zum Verschieben"
                     >
-                      <span className="t">{b.titel}</span>
+                      <span className="card-head">
+                        <span className="t">{b.titel}</span>
+                        <ModulInfo modul={m} info={info} label="ⓘ" />
+                      </span>
                       <span className="m">
                         <span className="mono">{formatCp(b.cp)} CP</span>
                         <span>{regeln.kategorien.find((x) => x.id === b.kategorie)?.kurz ?? b.kategorie}</span>
@@ -146,6 +166,8 @@ export function Plan() {
             </div>
           );
         })}
+      </div>
+      {detailModul ? <ModulDetail modul={detailModul} onClose={() => setDetailCode(null)} /> : null}
       </div>
 
       <div className="card" style={{ maxWidth: 640 }}>

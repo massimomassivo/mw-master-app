@@ -130,7 +130,8 @@ Gerechnet wird nur über benotete Belegungen in Kategorien mit `zaehltZurNote: t
 - Spalten sind Semester: `WS 26/27`, `SS 27`, `WS 27/28`, … sowie `vor dem Master` (vorgezogene Mastermodule aus dem Bachelor) und `ohne Termin`. Das erste Semester stellt man in den Einstellungen ein, die Anzahl wächst nach Bedarf.
 - Gemeint ist das Semester, in dem die **Prüfung** geschrieben wird. Das muss nicht zum Turnus des Moduls passen: Man kann ein SS-Modul ins WS legen, z. B. wenn man im Moodle schon angemeldet ist. Weicht das Semester vom Turnus ab, zeigt die App nur einen dezenten Hinweis und blockiert nichts.
 - Pro Semester: CP-Summe mit Richtwert 30 und die Liste der Module mit Kategorie-Farbe, Status, Ø aus dem Notenspiegel und Durchfallquote (Referenztermin, Semester und Warnung bei kleiner Stichprobe wie in 4.5).
-- Module per Drag & Drop oder Auswahlfeld verschieben.
+- Module per Drag & Drop oder Auswahlfeld verschieben. Damit Drag & Drop im Tauri-Fenster funktioniert (WebView2 fängt Ziehen sonst für Datei-Drops ab), ist im Fenster `dragDropEnabled: false` gesetzt; Dateien per Drag & Drop nimmt die App nicht an.
+- Karten von Katalogmodulen haben einen kleinen Knopf ⓘ. Er öffnet rechts dieselbe Detailansicht wie im Katalog (Beschreibung, alle Termine, Diagramm), ohne den Bearbeiten-Dialog; ein zweiter Klick oder ✕ schließt sie. Ein Klick auf die übrige Karte öffnet weiterhin den Bearbeiten-Dialog.
 - Gesamtüberblick: CP pro Kategorie über alle Semester gegen die Regeln, wie die Leiste in der bisherigen Modulwahl-HTML.
 
 ### 4.4 Spielmodus

@@ -1,9 +1,9 @@
 // Small shared UI pieces.
 import { useEffect, type ReactNode } from "react";
 import { useStore } from "../store";
-import type { Status } from "../types";
+import type { Modul, Status } from "../types";
 import { STATUS_LABEL } from "../types";
-import type { Referenztermin } from "../logic/notenspiegel";
+import { referenztermin, type Referenztermin } from "../logic/notenspiegel";
 
 export function KategorieBadge({ id, unterbereich }: { id: string; unterbereich?: string | null }) {
   const { regeln } = useStore();
@@ -120,5 +120,34 @@ export function Icon({ name, size = 18 }: { name: keyof typeof PATHS | string; s
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={PATHS[name] ?? ""} />
     </svg>
+  );
+}
+
+export interface InfoProps {
+  /** Code of the module whose detail is open. */
+  offen: string | null;
+  oeffnen: (code: string) => void;
+}
+
+/** Button that opens the catalog detail; shows Ø bestanden if there is a Notenspiegel. Empty cell for rows without a catalog module. */
+export function ModulInfo({ modul, info, label }: { modul?: Modul; info: InfoProps; label?: ReactNode }) {
+  if (!modul) return <span />;
+  const ref = referenztermin(modul);
+  const title = ref
+    ? `Beschreibung und Prüfungsstatistik öffnen · Ø bestanden ${formatSchnitt(ref.kennzahlen.schnittBestanden)} · Durchfall ${formatProzent(ref.kennzahlen.durchfallquote)} · ${ref.ns.semester}${ref.anzahlTermine > 1 ? ` (${ref.anzahlTermine} Termine)` : ""}${ref.kleineStichprobe ? ` · nur ${ref.kennzahlen.angetreten} Angetretene` : ""}`
+    : "Beschreibung öffnen · noch keine Prüfungsstatistik";
+  return (
+    <button
+      className={`ghost modul-info ${ref ? "hat-stat" : ""}`}
+      aria-pressed={info.offen === modul.code}
+      onClick={(e) => {
+        e.stopPropagation();
+        info.oeffnen(modul.code);
+      }}
+      title={title}
+      aria-label={`${modul.titel}: ${title}`}
+    >
+      {label ?? (ref ? <Kennwert r={ref}>Ø {formatSchnitt(ref.kennzahlen.schnittBestanden)}</Kennwert> : "ⓘ")}
+    </button>
   );
 }

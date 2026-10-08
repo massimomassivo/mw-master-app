@@ -4,14 +4,13 @@
 // belong to a catalog module open its detail (description, Notenspiegel) on the right.
 import { useMemo, useState } from "react";
 import { erreichteLeistungen, formatCp, formatNote, kategorieVon, parseNote, strukturCheck, type BereichCheck, type CheckStatus } from "../logic/noten";
-import { referenztermin } from "../logic/notenspiegel";
 import { alsLeistungen, ausPlan, modulCodeVon, neueId, offeneCpAuffuellen, spielErgebnis } from "../logic/spiel";
 import { bestaetigen } from "../platform";
 import { useStore } from "../store";
 import type { Belegung, Kategorie, Modul, SpielZeile } from "../types";
 import { ERREICHT } from "../types";
 import { ModulDetail } from "./ModulDetail";
-import { formatProzent, formatSchnitt, kategorieFarbe, Kennwert } from "./ui";
+import { kategorieFarbe, ModulInfo, type InfoProps } from "./ui";
 
 const STATUS_PILL: Record<CheckStatus, { text: string; cls: string }> = {
   ok: { text: "OK", cls: "ok" },
@@ -215,26 +214,6 @@ export function Spielmodus() {
       {detailModul ? <ModulDetail modul={detailModul} onClose={() => setDetailCode(null)} /> : null}
       </div>
     </div>
-  );
-}
-
-interface InfoProps {
-  /** Code of the module whose detail is open. */
-  offen: string | null;
-  oeffnen: (code: string) => void;
-}
-
-/** Button that opens the catalog detail; shows Ø bestanden if there is a Notenspiegel. Empty cell for rows without a catalog module. */
-function ModulInfo({ modul, info }: { modul?: Modul; info: InfoProps }) {
-  if (!modul) return <span />;
-  const ref = referenztermin(modul);
-  const title = ref
-    ? `Beschreibung und Prüfungsstatistik öffnen · Ø bestanden ${formatSchnitt(ref.kennzahlen.schnittBestanden)} · Durchfall ${formatProzent(ref.kennzahlen.durchfallquote)} · ${ref.ns.semester}${ref.anzahlTermine > 1 ? ` (${ref.anzahlTermine} Termine)` : ""}${ref.kleineStichprobe ? ` · nur ${ref.kennzahlen.angetreten} Angetretene` : ""}`
-    : "Beschreibung öffnen · noch keine Prüfungsstatistik";
-  return (
-    <button className={`ghost modul-info ${ref ? "hat-stat" : ""}`} aria-pressed={info.offen === modul.code} onClick={() => info.oeffnen(modul.code)} title={title} aria-label={`${modul.titel}: ${title}`}>
-      {ref ? <Kennwert r={ref}>Ø {formatSchnitt(ref.kennzahlen.schnittBestanden)}</Kennwert> : "ⓘ"}
-    </button>
   );
 }
 

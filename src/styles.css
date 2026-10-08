@@ -227,8 +227,8 @@ tr.fixed td { color: var(--muted); }
 .mini-row .pill { justify-self: start; }
 .stack-bar { display: flex; height: 12px; background: var(--soft); border-radius: 3px; overflow: hidden; }
 .stack-bar > span { display: block; height: 100%; border-right: 1px solid var(--surface); }
-.spiel-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-.spiel-main.with-detail { grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr); align-items: start; }
+.plan-main, .spiel-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.plan-main.with-detail, .spiel-main.with-detail { grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr); align-items: start; }
 .spiel-board { columns: 360px; column-gap: 14px; }
 .kat-card {
   break-inside: avoid; margin-bottom: 14px; background: var(--surface); border: 1px solid var(--line);
@@ -256,9 +256,9 @@ tr.fixed td { color: var(--muted); }
 .kat-row.platzhalter input.t { font-style: italic; color: var(--muted); }
 .kat-row.marked { background: var(--accent-soft); }
 .kat-row button.icon { padding: 2px 5px; color: var(--faint); }
-.kat-row button.modul-info { padding: 2px 4px; font-size: 11.5px; font-family: var(--mono); color: var(--faint); white-space: nowrap; justify-self: end; }
-.kat-row button.modul-info.hat-stat { color: var(--muted); }
-.kat-row button.modul-info[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); }
+button.modul-info { padding: 2px 4px; font-size: 11.5px; font-family: var(--mono); color: var(--faint); white-space: nowrap; justify-self: end; }
+button.modul-info.hat-stat { color: var(--muted); }
+button.modul-info[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); }
 .kat-title button.icon { padding: 1px 6px; font-size: 15px; color: var(--muted); }
 
 /* ---------------- plan board ---------------- */
@@ -273,7 +273,9 @@ tr.fixed td { color: var(--muted); }
 }
 .plan-card:hover { border-color: var(--accent); }
 .plan-card.dragging { opacity: 0.5; }
+.plan-card .card-head { display: flex; gap: 6px; align-items: flex-start; justify-content: space-between; }
 .plan-card .t { font-weight: 500; line-height: 1.3; }
+.plan-card button.modul-info { margin: -2px -4px 0 0; flex: none; font-size: 13px; }
 .plan-card .m { display: flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; align-items: center; }
 
 /* ---------------- catalog ---------------- */
@@ -323,7 +325,7 @@ tr.fixed td { color: var(--muted); }
 
 @media (max-width: 1050px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .catalog.with-detail, .spiel-main.with-detail { grid-template-columns: minmax(0, 1fr); }
+  .catalog.with-detail, .plan-main.with-detail, .spiel-main.with-detail { grid-template-columns: minmax(0, 1fr); }
   .detail { position: static; max-height: none; }
   .grid-3 { grid-template-columns: 1fr; }
 }
