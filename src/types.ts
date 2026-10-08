@@ -144,6 +144,8 @@ export interface SpielZeile {
   id: string;
   titel: string;
   kategorie: string;
+  /** Sub-area (only for categories with unterbereiche, e.g. UE-ETHIK). */
+  unterbereich?: string | null;
   cp: number;
   /** Assumed grade in hundredths; null = not filled in yet. */
   note100: number | null;

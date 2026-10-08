@@ -16,49 +16,64 @@ export function ausPlan(belegungen: Belegung[], vorhanden: SpielZeile[]): SpielZ
   const schon = new Set(vorhanden.map((z) => z.belegungId).filter((x) => x != null));
   return belegungen
     .filter((b) => OFFEN.includes(b.status) && !schon.has(b.id))
-    .map((b) => ({ id: neueId(), titel: b.titel, kategorie: b.kategorie, cp: b.cp, note100: null, quelle: "plan" as const, belegungId: b.id }));
+    .map((b) => ({
+      id: neueId(),
+      titel: b.titel,
+      kategorie: b.kategorie,
+      unterbereich: b.unterbereich,
+      cp: b.cp,
+      note100: null,
+      quelle: "plan" as const,
+      belegungId: b.id,
+    }));
 }
 
-const PLATZHALTER_TITEL: Record<string, string> = {
-  G: "Grundlagen-Modul",
-  K: "Mastermodul",
-  A: "Angrenzendes Fach",
-  F: "Flexibilisierung",
-  HP: "Hochschulpraktikum",
-  IE: "International Experience",
-  UE: "Überfachliche Ergänzung",
-  FP: "Forschungspraxis",
-  MA: "Master's Thesis",
-};
-
 /**
- * Generic placeholders until every category reaches its target CP:
+ * Generic placeholders ("Platzhalter"; the Spielmodus shows them in their
+ * category's card, so the title needs no category name) until every category reaches its target CP:
  * categories with a minimum are filled to it; the rest of a group (the 60 CP
  * Mastermodule) goes to the group's categories in order, respecting each
- * category's maximum. Already achieved CP and existing rows count.
+ * category's maximum. Already achieved CP and existing rows count. Within a
+ * category with sub-areas, the sub-area minimums are filled first.
  */
 export function offeneCpAuffuellen(echte: Leistung[], zeilen: SpielZeile[], regeln: Regeln): SpielZeile[] {
   const ist = new Map<string, number>();
-  for (const l of [...echte, ...zeilen]) ist.set(l.kategorie, (ist.get(l.kategorie) ?? 0) + l.cp);
+  const istUb = new Map<string, number>();
+  for (const l of [...echte, ...zeilen]) {
+    ist.set(l.kategorie, (ist.get(l.kategorie) ?? 0) + l.cp);
+    if (l.unterbereich) istUb.set(l.unterbereich, (istUb.get(l.unterbereich) ?? 0) + l.cp);
+  }
   const neu: SpielZeile[] = [];
 
-  const add = (kat: string, cp: number) => {
-    if (cp <= 1e-9) return;
-    const k = kategorieVon(regeln, kat);
+  const bloecke = (kat: string, unterbereich: string | null, cp: number) => {
     const block = regeln.platzhalterCp?.[kat] ?? 5;
     let rest = Math.round(cp * 10) / 10;
     while (rest > 1e-9) {
       const c = Math.min(block, rest);
       neu.push({
         id: neueId(),
-        titel: `${PLATZHALTER_TITEL[kat] ?? k?.kurz ?? kat} (Platzhalter)`,
+        titel: "Platzhalter",
         kategorie: kat,
+        unterbereich,
         cp: Math.round(c * 10) / 10,
         note100: null,
         quelle: "platzhalter",
       });
       rest = Math.round((rest - c) * 10) / 10;
     }
+  };
+
+  const add = (kat: string, cp: number) => {
+    if (cp <= 1e-9) return;
+    let rest = cp;
+    for (const u of kategorieVon(regeln, kat)?.unterbereiche ?? []) {
+      const c = Math.min(rest, Math.max(0, (u.minCp ?? 0) - (istUb.get(u.id) ?? 0)));
+      if (c <= 1e-9) continue;
+      bloecke(kat, u.id, c);
+      istUb.set(u.id, (istUb.get(u.id) ?? 0) + c);
+      rest -= c;
+    }
+    bloecke(kat, null, rest);
     ist.set(kat, (ist.get(kat) ?? 0) + cp);
   };
 
@@ -82,6 +97,10 @@ export function offeneCpAuffuellen(echte: Leistung[], zeilen: SpielZeile[], rege
   return neu;
 }
 
+export function alsLeistungen(zeilen: SpielZeile[]): Leistung[] {
+  return zeilen.map((z) => ({ cp: z.cp, kategorie: z.kategorie, unterbereich: z.unterbereich ?? null, note100: z.note100 }));
+}
+
 export interface SpielErgebnis extends Schnitt {
   echteCp: number;
   hypothetischeCp: number;
@@ -91,7 +110,7 @@ export interface SpielErgebnis extends Schnitt {
 
 export function spielErgebnis(belegungen: Belegung[], zeilen: SpielZeile[], regeln: Regeln): SpielErgebnis {
   const echte = erreichteLeistungen(belegungen);
-  const hypo: Leistung[] = zeilen.map((z) => ({ cp: z.cp, kategorie: z.kategorie, note100: z.note100 }));
+  const hypo = alsLeistungen(zeilen);
   // Rows without an assumed grade still count for CP coverage but not for the average.
   const s = berechneSchnitt([...echte, ...hypo], regeln);
   const sumCp = (ls: { cp: number }[]) => Math.round(ls.reduce((a, l) => a + l.cp, 0) * 10) / 10;

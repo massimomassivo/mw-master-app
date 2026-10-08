@@ -5,14 +5,15 @@ import { kennzahlen, neuesterHaupttermin } from "../logic/notenspiegel";
 import { useStore } from "../store";
 import type { Modul } from "../types";
 import { ModulDetail } from "./ModulDetail";
-import { formatProzent, formatSchnitt, KategorieBadge } from "./ui";
+import { formatProzent, formatSchnitt, kategorieFarbe, KategorieBadge } from "./ui";
 
 type SortKey = "titel" | "code" | "cp" | "turnus" | "schnitt" | "durchfall";
 
 export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
   const { shared, belegungen, regeln } = useStore();
   const [q, setQ] = useState("");
-  const [kat, setKat] = useState("");
+  // Category filter, multi-select. null = all categories (also covers modules with unknown categories).
+  const [kats, setKats] = useState<Set<string> | null>(null);
   const [tag, setTag] = useState("");
   const [turnus, setTurnus] = useState("");
   const [angebot, setAngebot] = useState("");
@@ -39,7 +40,7 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
     const needle = q.trim().toLowerCase();
     const list = module.filter(
       (m) =>
-        (!kat || m.kategorien.includes(kat)) &&
+        (!kats || m.kategorien.some((k) => kats.has(k))) &&
         (!tag || (m.tags ?? []).includes(tag)) &&
         (!turnus || m.turnus === turnus || (turnus !== "unregelmaessig" && m.turnus === "WS+SS")) &&
         (!angebot || (m.angebot ?? []).some((a) => a.semester === angebot)) &&
@@ -68,7 +69,17 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
       const c = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "de");
       return sort.asc ? c : -c;
     });
-  }, [module, q, kat, tag, turnus, angebot, sprache, sort, stat]);
+  }, [module, q, kats, tag, turnus, angebot, sprache, sort, stat]);
+
+  const alleKats = regeln.kategorien.map((k) => k.id);
+  const katAn = (id: string) => !kats || kats.has(id);
+  const toggleKat = (id: string) =>
+    setKats((alt) => {
+      const n = new Set(alt ?? alleKats);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n.size === alleKats.length && alleKats.every((k) => n.has(k)) ? null : n;
+    });
 
   const selModul = sel ? module.find((m) => m.code === sel) ?? null : null;
   // With the detail panel open, the table drops two columns so nothing scrolls sideways.
@@ -117,14 +128,6 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
       <div className="stack">
         <div className="filters">
           <input type="search" placeholder="Suche nach Titel, Nummer, Dozent" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Suche" />
-          <select value={kat} onChange={(e) => setKat(e.target.value)} aria-label="Kategorie">
-            <option value="">Alle Kategorien</option>
-            {regeln.kategorien.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.name}
-              </option>
-            ))}
-          </select>
           <select value={turnus} onChange={(e) => setTurnus(e.target.value)} aria-label="Turnus">
             <option value="">WS und SS</option>
             <option value="WS">läuft im WS</option>
@@ -151,6 +154,23 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
               ))}
             </select>
           ) : null}
+        </div>
+        <div className="filters" role="group" aria-label="Kategorien">
+          {regeln.kategorien.map((k) => (
+            <button key={k.id} className="chip kat" aria-pressed={katAn(k.id)} onClick={() => toggleKat(k.id)} title={k.name}>
+              <span className="dot" style={{ background: kategorieFarbe(regeln, k.id) }} />
+              {k.kurz}
+            </button>
+          ))}
+          <span className="spacer" />
+          <span className="row" style={{ gap: 4, flexWrap: "nowrap" }}>
+            <button className="ghost" disabled={!kats} onClick={() => setKats(null)}>
+              Alle wählen
+            </button>
+            <button className="ghost" disabled={kats?.size === 0} onClick={() => setKats(new Set())}>
+              Alle abwählen
+            </button>
+          </span>
         </div>
         {shared.tags.length ? (
           <div className="filters" role="group" aria-label="Themen">
@@ -185,7 +205,7 @@ export function Katalog({ zuEinstellungen }: { zuEinstellungen: () => void }) {
                 {rows.length === 0 ? (
                   <tr>
                     <td colSpan={kompakt ? 5 : 7} className="empty">
-                      Kein Modul passt zu diesen Filtern.
+                      {kats?.size === 0 ? "Keine Kategorie gewählt." : "Kein Modul passt zu diesen Filtern."}
                     </td>
                   </tr>
                 ) : (

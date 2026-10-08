@@ -140,14 +140,16 @@ Bewusst einfach: **Die App rechnet nichts zurück.** Man trägt vermutete Noten 
 - Die echten Noten (4.2) sind immer dabei und hier nicht änderbar.
 - Darunter kommen hypothetische Zeilen: Titel, Kategorie, CP und vermutete Note.
 - **„Aus Plan übernehmen“** legt für jede Belegung ohne Note (Status `Idee` bis `angemeldet`) eine Zeile an.
-- **„Offene CP auffüllen“** legt generische Platzhalter an, bis jede Kategorie ihre Soll-CP erreicht. Beispiele: „Mastermodul (5 CP)“, „Hochschulpraktikum (4 CP)“, „Forschungspraxis (11 CP)“, „Master's Thesis (30 CP)“.
+- **„Offene CP auffüllen“** legt generische Platzhalter („Platzhalter“) an, bis jede Kategorie ihre Soll-CP erreicht, in Blöcken nach `platzhalterCp` (z. B. Mastermodule je 5 CP, Hochschulpraktikum je 4 CP, Forschungspraxis 11 CP, Thesis 30 CP). Bei Kategorien mit Unterbereichen werden zuerst deren Mindestwerte gefüllt (Überfachliche Ergänzung: 3 CP Ethik, 2 CP Weitere).
+- **Darstellung:** Alle Noten sollen auf einen Bildschirm passen. Pro Kategorie gibt es eine Karte in der Kategorie-Farbe, mehrspaltig angeordnet. Jede Karte zeigt im Kopf CP-Ist gegen Soll mit Status (das ist der Strukturcheck der Kategorie, inkl. Unterbereichen) und listet darunter die echten Noten (fest, ausblendbar) und die angenommenen Zeilen. Neue Zeilen legt man direkt in der Karte der Kategorie an.
+- Oben steht ein kompakter Strukturcheck: je ein Balken für jede Gruppe (Mastermodule) und für die Gesamt-CP, segmentiert nach Kategorie-Farben; echte CP voll, angenommene CP blass.
 - Ergebnis wie in 4.2: Zeugnisnote, exakter Schnitt, Prädikat und CP-Abdeckung. Zusätzlich ist sichtbar, wie viel davon echt und wie viel hypothetisch ist.
 - Es gibt **einen** Spielstand. Er wird gespeichert und lässt sich zurücksetzen.
 - Komfortfunktion: Eine Note für alle markierten Zeilen auf einmal setzen.
 
 ### 4.5 Modulkatalog
 
-- Tabelle aller Module aus dem geteilten Ordner. Filter: Kategorie, Themen-Tag, Turnus (WS/SS), Angebot im gewählten Semester, Sprache, Freitextsuche (Titel, Nummer, Dozent).
+- Tabelle aller Module aus dem geteilten Ordner. Filter: Kategorie (Mehrfachauswahl als Chips, mit „Alle wählen“ und „Alle abwählen“; ein Modul passt, wenn eine seiner Kategorien gewählt ist), Themen-Tag, Turnus (WS/SS), Angebot im gewählten Semester, Sprache, Freitextsuche (Titel, Nummer, Dozent).
 - Spalten: Titel, Nummer, CP, Kategorie(n), Turnus, Sprache, Ø bestanden, Durchfallquote, „im Plan“. Alle Spalten sind sortierbar.
 - Detailansicht eines Moduls:
   - Kurzbeschreibung, Prüfungsform, Leitung, Sprache, CP, erlaubte Kategorien, Tags
